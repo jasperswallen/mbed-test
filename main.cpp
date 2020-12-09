@@ -81,9 +81,9 @@ void onSerialReceived(void)
     }
     if(p_buf > buf)
     {
-        for(size_t i = 0; i < strlen(p_buf); ++i)
+        for(size_t i = 0; i < strlen(buf); ++i)
         {
-            rxCallback(p_buf[i]);
+            rxCallback(buf[i]);
         }
     }
 }
