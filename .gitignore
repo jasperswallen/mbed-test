@@ -1,2 +1,3 @@
 build/
 mbed-cmake-config/
+.vscode/
