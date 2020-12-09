@@ -52,6 +52,16 @@ template <class SerialClass> class SerialStream : public Stream
         serialClass.attach(func, type);
     }
 
+    bool writable() const
+    {
+        return serialClass.writable();
+    }
+
+    bool readable() const
+    {
+        return serialClass.readable();
+    }
+
   private:
     // Dummy implementations -- these will never be called because we override
     // write() and read() instead. but we have to override them since they're

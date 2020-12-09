@@ -39,7 +39,11 @@ int main()
     pc.printf("Starting...\r\n");
     t.start(callback(&eventQueue, &EventQueue::dispatch_forever));
     pc.sigio(callback(onSigio));
+
+    int i = 0;
     while(1)
     {
+        pc.printf("%i\r\n", i++);
+        ThisThread::sleep_for(1s);
     }
 }
