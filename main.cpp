@@ -10,9 +10,65 @@
 
 BufferedSerial serial(USBTX, USBRX, BAUDRATE);
 SerialStream<BufferedSerial> pc(serial);
-char buf[64];
+char buf[CMD_BUFFER_SIZE];
 Thread t;
 EventQueue eventQueue;
+
+char cmdStr[CMD_BUFFER_SIZE];
+volatile bool pendingCmd = false;
+volatile int currPos = 0;
+
+void rxCallback(char c)
+{
+    static char prev_char = '\0';
+
+    bool bufferFull = (currPos == (CMD_BUFFER_SIZE - 1));
+
+    // if we got a newline (handling \n, \r, and \r\n equally)
+    if(c == '\n' || c == '\r' || bufferFull)
+    {
+        // Case 1 (\n recieved)   : n > 1, command is copied to cmdStr
+        // Case 2 (\r recieved)   : n > 1, command is copied to cmdStr
+        // Case 3 (\r\n recieved) : \r is received first (Case 2),
+        //                          then \n is recieved but n == 1, so it is
+        //                          ignored.
+        if(prev_char == '\r')
+        {
+            prev_char = c;
+            pc.sync();
+            return; // skip this \r or \n, since it's prob part of a CRLF (or an
+                    // \r\r. Which would be weird.)
+        }
+
+        // insert string null terminator
+        cmdStr[currPos] = '\0';
+        pendingCmd = true;
+        if(bufferFull)
+        {
+            prev_char = c;
+            pc.sync();
+        }
+    }
+    else
+    {
+        pc.putc(c);
+        cmdStr[currPos] = c;
+    }
+    currPos++;
+    prev_char = c;
+}
+
+// A function that echoes any received data back
+void updateCommand(char *cmd)
+{
+    pc.printf("\r\nReceived CMD ");
+    pc.printf(cmd);
+    pc.printf("\r\n");
+
+    pendingCmd = false;
+    memset(cmdStr, 0, strlen(cmdStr));
+    currPos = 0;
+}
 
 void onSerialReceived(void)
 {
@@ -25,7 +81,10 @@ void onSerialReceived(void)
     }
     if(p_buf > buf)
     {
-        printf("Received: %s\r\n", buf);
+        for(size_t i = 0; i < strlen(p_buf); ++i)
+        {
+            rxCallback(p_buf[i]);
+        }
     }
 }
 
@@ -44,6 +103,10 @@ int main()
     while(1)
     {
         pc.printf("%i\r\n", i++);
+        if(pendingCmd)
+        {
+            updateCommand(cmdStr);
+        }
         ThisThread::sleep_for(1s);
     }
 }
