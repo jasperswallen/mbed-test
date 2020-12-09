@@ -12,40 +12,25 @@ UnbufferedSerial serial(USBTX, USBRX, BAUDRATE);
 SerialStream<UnbufferedSerial> pc(serial);
 
 char cmdStr[CMD_BUFFER_SIZE];
+int currPos = 0;
 volatile bool pendingCmd = false;
 volatile bool charAvailable = false;
 
 void rxCallback(char c)
 {
     static char prev_char = '\0';
-    static int currPos = 0;
-
     bool bufferFull = (currPos == (CMD_BUFFER_SIZE - 1));
 
-    // if we got a newline (handling \n, \r, and \r\n equally)
     if(c == '\n' || c == '\r' || bufferFull)
     {
-        // Case 1 (\n recieved)   : n > 1, command is copied to cmdStr
-        // Case 2 (\r recieved)   : n > 1, command is copied to cmdStr
-        // Case 3 (\r\n recieved) : \r is received first (Case 2),
-        //                          then \n is recieved but n == 1, so it is
-        //                          ignored.
         if(prev_char == '\r')
         {
             prev_char = c;
-            pc.sync();
-            return; // skip this \r or \n, since it's prob part of a CRLF (or an
-                    // \r\r. Which would be weird.)
+            return;
         }
 
-        // insert string null terminator
         cmdStr[currPos] = '\0';
         pendingCmd = true;
-        if(bufferFull)
-        {
-            prev_char = c;
-            pc.sync();
-        }
     }
     else
     {
@@ -65,6 +50,7 @@ void updateCommand(char *cmd)
 
     pendingCmd = false;
     memset(cmdStr, 0, strlen(cmdStr));
+    currPos = 0;
 }
 
 void charToRead()
@@ -81,10 +67,10 @@ int main(void)
     {
         if(charAvailable)
         {
-            pc.printf("charAvailable\r\n");
             char c;
             pc.read(&c, 1);
             rxCallback(c);
+            charAvailable = false;
         }
 
         if(pendingCmd)
