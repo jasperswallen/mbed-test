@@ -70,6 +70,7 @@ void updateCommand(char *cmd)
 
 void onSerialReceived(void)
 {
+    charsAvailable = false;
     char *p_buf = buf;
 
     memset(buf, 0, sizeof(buf));
