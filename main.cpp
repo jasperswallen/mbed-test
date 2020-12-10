@@ -11,11 +11,9 @@
 BufferedSerial serial(USBTX, USBRX, BAUDRATE);
 SerialStream<BufferedSerial> pc(serial);
 char buf[CMD_BUFFER_SIZE];
-Thread t;
-EventQueue eventQueue;
-
 char cmdStr[CMD_BUFFER_SIZE];
 volatile bool pendingCmd = false;
+volatile bool charsAvailable = false;
 volatile int currPos = 0;
 
 void rxCallback(char c)
@@ -90,19 +88,23 @@ void onSerialReceived(void)
 
 void onSigio(void)
 {
-    eventQueue.call(onSerialReceived);
+    charsAvailable = true;
 }
 
 int main()
 {
     pc.printf("Starting...\r\n");
-    t.start(callback(&eventQueue, &EventQueue::dispatch_forever));
     pc.sigio(callback(onSigio));
 
     int i = 0;
     while(1)
     {
         pc.printf("%i\r\n", i++);
+        if(charsAvailable)
+        {
+            onSerialReceived();
+        }
+
         if(pendingCmd)
         {
             updateCommand(cmdStr);
