@@ -19,12 +19,12 @@ int main()
 {
     pc = fdopen(&serial, "r+");
 
-    fprintf(pc, "%s\n", (cfh.get_internal_buf() == nullptr) ? "null" : "full");
+    fprintf(pc, "%s\n", (cfh.get_internal_buf().empty()) ? "empty" : "has element");
     ThisThread::sleep_for(1s);
 
     printf("Hello\r\n");
 
-    fprintf(pc, "%s\n", (cfh.get_internal_buf() == nullptr) ? "null" : "full");
+    fprintf(pc, "%s\n", (cfh.get_internal_buf().empty()) ? "empty" : "has element");
 
     ThisThread::sleep_for(1s);
 }

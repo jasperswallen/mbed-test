@@ -1,19 +1,19 @@
 #include <mbed.h>
 
+#include <vector>
+
 class CustomFileHandle : public FileHandle
 {
 public:
-    CustomFileHandle() : internal_buf(nullptr)
+    CustomFileHandle()
     {
     }
 
     virtual ssize_t write(const void *buffer, size_t size) final
     {
-        /* Appends data to internal array */
-        if (memcpy(internal_buf, buffer, size))
-        {
-            return -ENOMEM;
-        }
+        internal_buf.emplace_back(
+            reinterpret_cast<const char *>(buffer),
+            reinterpret_cast<const char *>(buffer) + size);
 
         return size;
     }
@@ -41,11 +41,11 @@ public:
         return 0;
     }
 
-    void *get_internal_buf()
+    std::vector<std::vector<char>> &get_internal_buf()
     {
         return internal_buf;
     }
 
 private:
-    void *internal_buf;
+    std::vector<std::vector<char>> internal_buf;
 };
