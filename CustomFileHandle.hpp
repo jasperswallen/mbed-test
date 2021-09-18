@@ -14,6 +14,7 @@ public:
         internal_buf.emplace_back(
             reinterpret_cast<const char *>(buffer),
             reinterpret_cast<const char *>(buffer) + size);
+        internal_buf.back().push_back('\0');
 
         return size;
     }
@@ -41,7 +42,7 @@ public:
         return 0;
     }
 
-    std::vector<std::vector<char>> &get_internal_buf()
+    const std::vector<std::vector<char>> &get_internal_buf()
     {
         return internal_buf;
     }
