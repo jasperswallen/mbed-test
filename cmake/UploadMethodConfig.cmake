@@ -4,7 +4,7 @@
 
 # General config options
 # -------------------------------------------------------------
-set(UPLOAD_METHOD_DEFAULT JLINK)
+set(UPLOAD_METHOD_DEFAULT STM32CUBE)
 
 # use a higher numbered port to allow use without root on Linux/Mac
 set(GDB_PORT 23331)
@@ -59,7 +59,7 @@ endif()
 # Config options for STM32Cube
 # -------------------------------------------------------------
 
-set(STM32CUBE_UPLOAD_ENABLED FALSE)
+set(STM32CUBE_UPLOAD_ENABLED TRUE)
 
 if(STM32CUBE_UPLOAD_ENABLED)
 
