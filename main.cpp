@@ -13,14 +13,18 @@ FileHandle *mbed_override_console(int fd)
 }; // namespace mbed
 
 BufferedSerial serial(USBTX, USBRX, 115200);
+FILE * pc;
 
 int main()
 {
-    const char *msg = (cfh.get_internal_buf() == nullptr) ? "null" : "full";
-    serial.write((void *)msg, 4);
+    pc = fdopen(&serial, "r+");
+
+    fprintf(pc, "%s\n", (cfh.get_internal_buf() == nullptr) ? "null" : "full");
+    ThisThread::sleep_for(1s);
 
     printf("Hello\r\n");
 
-    const char *msg_2 = (cfh.get_internal_buf() == nullptr) ? "null" : "full";
-    serial.write((void *)msg_2, 4);
+    fprintf(pc, "%s\n", (cfh.get_internal_buf() == nullptr) ? "null" : "full");
+
+    ThisThread::sleep_for(1s);
 }

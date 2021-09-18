@@ -1,0 +1,20 @@
+connectivity/*
+storage/*
+!storage/blockdevice/*
+features/*
+drivers/device_key/*
+
+# enable Ethernet stuff
+!connectivity/drivers/emac/*
+!connectivity/drivers/mbedtls/*
+!connectivity/netsocket/*
+!connectivity/nanostack/nanostack-hal-mbed-cmsis-rtos/*
+!connectivity/nanostack/sal-stack-nanostack-eventloop/*
+connectivity/netsocket/source/Cellular*
+!connectivity/lwipstack/*
+!connectivity/mbedtls/*
+!connectivity/libraries/nanostack-libservice/*
+!connectivity/libraries/ppp/*
+
+# disable USB
+drivers/usb/*

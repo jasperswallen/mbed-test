@@ -1,0 +1,12 @@
+{
+    "MicroDAQHub": {
+      "inherits": ["MCU_STM32H743xI"],
+      "device_has_add": [
+        "EMAC"
+      ],
+      "overrides": {
+        "network-default-interface-type": "ETHERNET"
+      },
+      "device_name": "STM32H743BITx"
+    }
+  }

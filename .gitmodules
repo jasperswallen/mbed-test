@@ -1,3 +1,3 @@
 [submodule "mbed-cmake"]
 	path = mbed-cmake
-	url = git@github.com:jasperswallen/mbed-cmake.git
+	url = git@github.com:USCRPL/mbed-cmake.git
