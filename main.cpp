@@ -1,8 +1,9 @@
 #include <mbed.h>
 
-#include "CustomFileHandle.hpp"
+#include "ConsoleRedirection.hpp"
 
-static CustomFileHandle cfh;
+static ConsoleOutput networkConsole;
+static ConsoleRedirection console(networkConsole);
 
 namespace mbed
 {
@@ -11,7 +12,7 @@ namespace mbed
  */
 FileHandle *mbed_override_console(int fd)
 {
-    return &cfh;
+    return &console;
 }
 }; // namespace mbed
 
@@ -23,30 +24,15 @@ int main()
 {
     pc = fdopen(&serial, "r+");
 
-    fprintf(pc, "%s\n", (cfh.get_internal_buf().empty()) ? "empty" : "has element");
-    ThisThread::sleep_for(1s);
+    fprintf(pc, "1st: %u\n", console.getNetworkConsole().length);
 
     printf("Hello\r\n");
 
-    fprintf(pc, "%s\n", (cfh.get_internal_buf().empty()) ? "empty" : "has element");
+    fprintf(pc, "2nd: %u\n", console.getNetworkConsole().length);
 
-    printf("hi\rhello\tjksdflkjsd");
+    printf("Hello Again!\r\n");
 
-    /* Note that without a newline, this does not get added to the internal buffer */
-    for (const auto &command : cfh.get_internal_buf())
-    {
-        fprintf(pc, "Got data: %s\n", command.data());
-    }
-    fprintf(pc, "Total Num of Calls: %d\r\n", cfh.get_internal_buf().size());
-    ThisThread::sleep_for(1s);
+    fprintf(pc, "3rd: %u\n", console.getNetworkConsole().length);
 
-    /* Flush the buffer, appending to the internal buffer (and not clearing) */
-    printf("With a newline:\r\n");
-
-    for (const auto &command : cfh.get_internal_buf())
-    {
-        fprintf(pc, "Got data: %s\n", command.data());
-    }
-    fprintf(pc, "Total Num of Calls: %d\r\n", cfh.get_internal_buf().size());
-    ThisThread::sleep_for(1s);
+    fprintf(pc, "%.*s", console.getNetworkConsole().length, reinterpret_cast<const char *>(console.getNetworkConsole().buf));
 }
