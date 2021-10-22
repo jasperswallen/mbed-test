@@ -89,6 +89,8 @@ MBED_WEAK uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
     RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
+    /* Supply configuration update enable */
+    HAL_PWREx_ConfigSupply(PWR_LDO_SUPPLY);
     /* Configure the main internal regulator output voltage */
     __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
@@ -158,9 +160,13 @@ MBED_WEAK uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
 /******************************************************************************/
 uint8_t SetSysClock_PLL_HSI(void)
 {
+	return 1;
+
     RCC_ClkInitTypeDef RCC_ClkInitStruct;
     RCC_OscInitTypeDef RCC_OscInitStruct;
 
+    /*!< Supply configuration update enable */
+    HAL_PWREx_ConfigSupply(PWR_LDO_SUPPLY);
     /* Configure the main internal regulator output voltage */
     __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
     while (!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
@@ -172,7 +178,7 @@ uint8_t SetSysClock_PLL_HSI(void)
     RCC_OscInitStruct.CSIState = RCC_CSI_OFF;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-    RCC_OscInitStruct.PLL.PLLM = 8;    // 8 MHz
+    RCC_OscInitStruct.PLL.PLLM = 16;    // 8 MHz
     RCC_OscInitStruct.PLL.PLLN = 120;  // 960 MHz
     RCC_OscInitStruct.PLL.PLLP = 2;    // 480 MHz
     RCC_OscInitStruct.PLL.PLLQ = 96;   // PLL1Q used for FDCAN = 10 MHz
