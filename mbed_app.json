@@ -10,6 +10,12 @@
             "target.stdio_uart_tx": "PB_6",
             "target.stdio_uart_rx": "PB_7",
             "target.hse_value": 25000000
+        },
+        "SensorBoard": {
+            "target.clock_source": "USE_PLL_HSE_EXTC",
+            "target.hse_value": 25000000,
+            "target.stdio_uart_tx": "PB_6",
+            "target.stdio_uart_rx": "PB_7"
         }
     }
 }

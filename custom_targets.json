@@ -8,5 +8,10 @@
         "network-default-interface-type": "ETHERNET"
       },
       "device_name": "STM32H743BITx"
+    },
+    "SensorBoard":
+    {
+        "inherits": ["MCU_STM32H743xI"],
+        "device_name": "STM32H743ZITx"
     }
   }
