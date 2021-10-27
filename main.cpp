@@ -1,5 +1,6 @@
 #include <mbed.h>
 
+#include "ADIS16467.h"
 #include "KX134SPI.h"
 #include "LM75B.h"
 #include "MS5607SPI.h"
@@ -21,6 +22,9 @@ constexpr PinName I2C3_SDA = PC_9;
 constexpr PinName I2C3_SCL = PA_8;
 
 constexpr PinName ALT_CS = PE_7;
+
+constexpr PinName ADIS_CS  = PE_9;
+constexpr PinName ADIS_RST = PE_8;
 
 void connect_to_accel()
 {
@@ -111,6 +115,38 @@ void connect_to_altimeter()
             alt.convertToTemp(rawTemp),
             alt.convertToPressure(rawTemp, rawPressure),
             alt.convertToAltitude(rawTemp, rawPressure));
+    }
+    else
+    {
+        printf("Failed to connect\r\n");
+    }
+}
+
+void connect_to_adis()
+{
+    ADIS16467 adis(MISC_MOSI, MISC_MISO, MISC_SCLK, ADIS_CS, ADIS_RST);
+
+    adis.initADIS();
+
+    printf("\r\n\r\nConnecting to ADIS...\r\n");
+    if (adis.checkExistence())
+    {
+        printf("Successfully Connected!\r\n");
+
+        adis.resetDeltaAngle();
+        while (!adis.hasNewData())
+        {
+            ThisThread::sleep_for(100ms);
+        }
+
+        ADIS16467::BurstReadResult result = {};
+        adis.burstRead(result);
+
+        float accelX = (float)(result.accelX) * adis.ACCEL_CONV;
+        float accelY = (float)(result.accelY) * adis.ACCEL_CONV;
+        float accelZ = (float)(result.accelZ) * adis.ACCEL_CONV;
+
+        printf("Read accel mg: %.02f | %.02f | %.02f\r\n", accelX, accelY, accelZ);
     }
     else
     {
