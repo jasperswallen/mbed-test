@@ -39,12 +39,12 @@ bool KX134Base::checkExistence()
     readRegisterOneByte(Register::WHO_AM_I, whoami);
 
 #if KX134_DEBUG
-    _printf("Checking existence: WHO_AM_I returned 0x%X", whoami);
+    printf("Checking existence: WHO_AM_I returned 0x%X", whoami);
 #endif
     if (whoami != 0x46)
     {
 #if KX134_DEBUG
-        _printf(" but expected 0x46\r\n");
+        printf(" but expected 0x46\r\n");
 #endif
         return false; // WHO_AM_I is incorrect
     }
@@ -54,18 +54,18 @@ bool KX134Base::checkExistence()
     readRegisterOneByte(Register::COTR, cotr);
 
 #if KX134_DEBUG
-    _printf(" and COTR returned 0x%X", cotr);
+    printf(" and COTR returned 0x%X", cotr);
 #endif
     if (cotr != 0x55)
     {
 #if KX134_DEBUG
-        _printf(" but expected 0x55\r\n");
+        printf(" but expected 0x55\r\n");
 #endif
         return false; // COTR is incorrect
     }
 
 #if KX134_DEBUG
-    _printf("\r\nSuccessfully checked existence\r\n");
+    printf("\r\nSuccessfully checked existence\r\n");
 #endif
 
     return true;
@@ -85,7 +85,7 @@ void KX134Base::getAccelerations(int16_t* output)
     output[2] = convertTo16BitValue(words[4], words[5]) + _offsets[2];
 
 #if KX134_DEBUG
-    _printf("Got accelerations: x=%d, y=%d, z=%d\r\n", output[0], output[1], output[2]);
+    printf("Got accelerations: x=%d, y=%d, z=%d\r\n", output[0], output[1], output[2]);
 #endif
 }
 
@@ -95,7 +95,7 @@ bool KX134Base::dataReady()
     readRegisterOneByte(Register::INS2, buf);
 
 #if KX134_DEBUG
-    _printf("Checking if data is ready: expected 0x10, received 0x%X\r\n", buf);
+    printf("Checking if data is ready: expected 0x10, received 0x%X\r\n", buf);
 #endif
 
     return (buf & (1 << 4)); // bit4 should be set
@@ -134,7 +134,7 @@ void KX134Base::setAccelOffsets(int16_t* offsets) { memcpy(_offsets, offsets, si
 void KX134Base::setAccelRange(Range range)
 {
 #if KX134_DEBUG
-    _printf("Setting range to 0x%" PRIx8 "\r\n", static_cast<uint8_t>(range));
+    printf("Setting range to 0x%" PRIx8 "\r\n", static_cast<uint8_t>(range));
 #endif
 
     enableRegisterWriting();
@@ -152,7 +152,7 @@ void KX134Base::setAccelRange(Range range)
 void KX134Base::setOutputDataRateHz(uint32_t hz)
 {
 #if KX134_DEBUG
-    _printf("Setting ODR to %" PRIu32 " hz\r\n", hz);
+    printf("Setting ODR to %" PRIu32 " hz\r\n", hz);
 #endif
 
     // calculate byte representation from new polling rate
@@ -169,8 +169,8 @@ void KX134Base::setOutputDataRateHz(uint32_t hz)
 void KX134Base::setOutputDataRateBytes(uint8_t byteHz)
 {
 #if KX134_DEBUG
-    _printf("Setting ODR to 0x%x byte-wise\r\n", byteHz);
-    _printf("That should be %f hz\r\n", pow(2, byteHz) * 25.0 / 32.0);
+    printf("Setting ODR to 0x%x byte-wise\r\n", byteHz);
+    printf("That should be %f hz\r\n", pow(2, byteHz) * 25.0 / 32.0);
 #endif
 
     enableRegisterWriting();
@@ -217,7 +217,7 @@ int16_t KX134Base::convertTo16BitValue(uint8_t low, uint8_t high)
     int16_t value = static_cast<int16_t>(val2sComplement);
 
 #if KX134_DEBUG
-    _printf(
+    printf(
         "Converting low (%d) and high (%d) to get 16 bit value (%d)\r\n", low, high, value);
 #endif
 
@@ -227,7 +227,7 @@ int16_t KX134Base::convertTo16BitValue(uint8_t low, uint8_t high)
 void KX134Base::enableRegisterWriting()
 {
 #if KX134_DEBUG
-    _printf("Enabling register writing\r\n");
+    printf("Enabling register writing\r\n");
 #endif
     uint8_t writeByte = (0 << 7) | (res << 6) | (drdye_enable << 5) | (gsel[1] << 4)
         | (gsel[0] << 3) | (tdte_enable << 2) | (tpe_enable);
@@ -238,7 +238,7 @@ void KX134Base::enableRegisterWriting()
 void KX134Base::disableRegisterWriting()
 {
 #if KX134_DEBUG
-    _printf("Disabling register writing\r\n");
+    printf("Disabling register writing\r\n");
 #endif
 
     uint8_t writeByte = (1 << 7) | (res << 6) | (drdye_enable << 5) | (gsel[1] << 4)

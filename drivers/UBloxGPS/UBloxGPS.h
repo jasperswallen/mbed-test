@@ -8,10 +8,10 @@
 
 #include <cinttypes>
 
-#define UBloxGPS_DEBUG 0
+#define UBloxGPS_DEBUG 1
 
 // Enable to print bytes sent and received in each SPI transaction
-#define UBloxGPS_TRANSACTION_DEBUG 0
+#define UBloxGPS_TRANSACTION_DEBUG 1
 
 namespace UBlox
 {
