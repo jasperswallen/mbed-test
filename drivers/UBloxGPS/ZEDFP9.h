@@ -18,23 +18,6 @@ class ZEDF9P : public UBloxGPS
 
 public:
     /**
-     * Construct a ZEDF9P for I2C use, providing pins and parameters.
-     *
-     * This doesn't actually initialize the chip, you will need to call begin() for that.
-     *
-     * @param user_SDApin Hardware I2C SDA pin connected to the MAX8
-     * @param user_SCLpin Hardware I2C SCL pin connected to the MAX8
-     * @param user_RSTPin Output pin connected to NRST
-     * @param i2cAddress I2C address.  The MAX8 defaults to 0x42
-     * @param i2cPortSpeed I2C frequency.
-     */
-    ZEDF9P(PinName user_SDApin, PinName user_SCLpin, PinName user_RSTPin,
-        uint8_t i2cAddress = UBloxGPS_I2C_DEF_ADDRESS, int i2cPortSpeed = 100000)
-        : UBloxGPS(user_SDApin, user_SCLpin, user_RSTPin, i2cAddress, i2cPortSpeed)
-    {
-    }
-
-    /**
      * Construct a ZEDF9P for SPI use, providing pins and parameters.
      *
      * This doesn't actually initialize the chip, you will need to call begin() for that.

@@ -16,31 +16,9 @@
 namespace UBlox
 {
 
-UBloxGPS::UBloxGPS(PinName user_SDApin, PinName user_SCLpin,
-    PinName user_RSTPin, uint8_t i2cAddress, int i2cPortSpeed)
-    : i2cAddress(i2cAddress)
-    , isSPI(false)
-    , i2cPort_(user_SDApin, user_SCLpin)
-    , spiPort_(NC, NC, NC)
-    , spiCS_(NC)
-    , reset_(user_RSTPin, 1)
-{
-    // Get user settings
-    i2cPortSpeed_ = i2cPortSpeed;
-
-    const int UBloxGPS_I2c_MAX_SPEED = 4000000; // 400 kHz
-    if (i2cPortSpeed_ > UBloxGPS_I2c_MAX_SPEED)
-    {
-        i2cPortSpeed_ = UBloxGPS_I2c_MAX_SPEED;
-    }
-    i2cPort_.frequency(i2cPortSpeed_);
-}
-
 UBloxGPS::UBloxGPS(PinName user_MOSIpin, PinName user_MISOpin,
     PinName user_RSTPin, PinName user_SCLKPin, PinName user_CSPin, int spiClockRate)
-    : isSPI(true)
-    , i2cPort_(NC, NC)
-    , spiPort_(user_MOSIpin, user_MISOpin, user_SCLKPin)
+    : spiPort_(user_MOSIpin, user_MISOpin, user_SCLKPin)
     , spiCS_(user_CSPin)
     , reset_(user_RSTPin, 1)
 {
@@ -346,14 +324,7 @@ bool UBloxGPS::sendCommand(uint8_t messageClass, uint8_t messageID, const uint8_
     DEBUG("\r\n");
 
     bool status;
-    if (isSPI)
-    {
-        status = performSPITransaction(packet, packetLen) == ReadStatus::DONE;
-    }
-    else
-    {
-        status = sendMessageI2C(packet, packetLen);
-    }
+    status = performSPITransaction(packet, packetLen) == ReadStatus::DONE;
 
     if (shouldWaitForACK)
     {
@@ -431,14 +402,7 @@ bool UBloxGPS::waitForMessage(uint8_t messageClass, uint8_t messageID, float tim
 // decides whether using SPI or I2C
 UBloxGPS::ReadStatus UBloxGPS::readMessage()
 {
-    if (isSPI)
-    {
-        return performSPITransaction(nullptr, 0);
-    }
-    else
-    {
-        return readMessageI2C();
-    }
+    return performSPITransaction(nullptr, 0);
 }
 
 UBloxGPS::ReadStatus UBloxGPS::performSPITransaction(uint8_t* packet, uint16_t packetLen)
@@ -584,147 +548,6 @@ UBloxGPS::ReadStatus UBloxGPS::performSPITransaction(uint8_t* packet, uint16_t p
     return ReadStatus::DONE;
 }
 
-// reads next message through I2C
-UBloxGPS::ReadStatus UBloxGPS::readMessageI2C()
-{
-    int i2cOutputSize = readLenI2C();
-    if (i2cOutputSize == -1)
-    {
-        printf("Didn't rcv ack from %s when reading length\r\n", getName());
-        return ReadStatus::ERR;
-    }
-
-    if (i2cOutputSize == 0)
-    {
-        // nothing to do
-        return ReadStatus::NO_DATA;
-    }
-
-    i2cPort_.start();
-    int readResult = i2cPort_.write((i2cAddress << 1) | 0x01);
-
-    if (readResult != 1)
-    {
-        printf("Didn't receive ack from %s\r\n", getName());
-		i2cPort_.stop();
-        return ReadStatus::ERR;
-    }
-
-    bool isLastByte = false;
-	currMessageLength_ = 0;
-	int ubxMsgLen = 100000; // large value to stop loop exit condition, will read real value later
-
-    // for loop in case there's a data error and we don't detect the last byte
-    for (int rxIndex = 0; rxIndex < i2cOutputSize; rxIndex++)
-    {
-        int value = i2cPort_.read(!isLastByte);
-        if (value == -1)
-        {
-			i2cPort_.stop();
-            return ReadStatus::ERR;
-        }
-        uint8_t incoming = static_cast<uint8_t>(value);
-
-        if (rxIndex == 0)
-        {
-            if (incoming == NMEA_MESSAGE_START_CHAR)
-            {
-                // NMEA sentences start with a dollars sign
-                isNMEASentence = true;
-            }
-            else if (incoming == UBX_MESSAGE_START_CHAR)
-            {
-                // UBX sentences start with a 0xB5
-                isNMEASentence = false;
-            }
-            else if (incoming == 0xFF)
-            {
-                DEBUG("Recieved 0xFF despite output buffer length > 0\r\n");
-            }
-            else
-            {
-                printf("Unknown first character \r\n");
-				i2cPort_.stop();
-				return ReadStatus::ERR;
-            }
-        }
-        else if (rxIndex == 5 && !isNMEASentence)
-        {
-            // read length and change that to msg length
-            ubxMsgLen = (static_cast<uint16_t>(rxBuffer[rxIndex] << 8) | rxBuffer[rxIndex - 1]) + 8;
-            // non-payload body of a ubx message is 8
-        }
-
-        if (rxIndex <= MAX_MESSAGE_LEN)
-        {
-            rxBuffer[rxIndex] = incoming;
-            currMessageLength_++;
-        }
-
-        // if it's an NMEA sentence, there is a CRLF at the end
-        // if it's an UBX  sentence, there is a length passed before the payload
-        if ((isNMEASentence && incoming == '\n') || (!isNMEASentence && rxIndex == ubxMsgLen - 1))
-        {
-            break;
-        }
-    }
-
-    if (currMessageLength_ <= MAX_MESSAGE_LEN)
-    {
-        // add null terminator
-        rxBuffer[currMessageLength_] = 0;
-    }
-
-    i2cPort_.stop();
-
-    DEBUG("Read stream of %s: ", getName());
-    for (size_t j = 0; j < currMessageLength_; j++)
-    {
-        DEBUG("%02" PRIx8, rxBuffer[j]);
-    }
-    DEBUG(";\r\n");
-
-    if (!verifyChecksum(currMessageLength_))
-    {
-        printf("Checksums for UBX message don't match!\r\n");
-        return ReadStatus::ERR;
-    }
-
-	processMessage();
-
-    return ReadStatus::DONE;
-}
-
-// send the header then the data to the Max8 on the default address 0x42
-// Returns false if sensor does not ACK
-bool UBloxGPS::sendMessageI2C(uint8_t* packet, uint16_t packetLen)
-{
-
-    // start the transaction and contact the GPS
-    i2cPort_.start();
-
-    // to indicate an i2c read, shift the 7 bit address up 1 bit and keep bit 0 as a 0
-    int writeResult = i2cPort_.write(i2cAddress << 1);
-
-    if (writeResult != 1)
-    {
-        printf("%s I2C write failed!\r\n", getName());
-        i2cPort_.stop();
-        return false;
-    }
-
-    DEBUG("%s I2C write acked!\r\n", getName());
-
-    for (uint16_t i = 0; i < packetLen; i++)
-    {
-        i2cPort_.write(packet[i]);
-    }
-
-    i2cPort_.stop();
-
-    return true;
-}
-
 void UBloxGPS::processMessage()
 {
     switch (rxBuffer[UBX_BYTE_CLASS])
@@ -766,34 +589,6 @@ void UBloxGPS::processMessage()
         default:
             return;
     }
-}
-
-int32_t UBloxGPS::readLenI2C()
-{
-
-    i2cPort_.start();
-    int i2cStatus = i2cPort_.write((i2cAddress << 1) | 0x00);
-    if (i2cStatus != 1)
-    {
-		i2cPort_.stop();
-        return -1;
-    }
-    i2cPort_.write(0xFD);
-
-    i2cPort_.start();
-    i2cStatus = i2cPort_.write((i2cAddress << 1) | 0x01);
-    if (i2cStatus != 1)
-    {
-		i2cPort_.stop();
-        return -1;
-    }
-
-    uint8_t highByte = static_cast<uint8_t>(i2cPort_.read(true));
-    uint8_t lowByte = static_cast<uint8_t>(i2cPort_.read(false));
-
-    i2cPort_.stop();
-
-    return (static_cast<uint16_t>(highByte << 8) | lowByte);
 }
 
 bool UBloxGPS::calcChecksum(const uint8_t* packet, uint32_t packetLen, uint8_t& chka, uint8_t& chkb) const

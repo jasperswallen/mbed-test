@@ -42,20 +42,6 @@ public:
     };
 
     /**
-     * @brief Construct an I2C UBloxGPS, providing pins and parameters.
-     *
-     * @note This doesn't actually initialize the chip, you will need to call begin() for that.
-     *
-     * @param user_SDApin Hardware I2C SDA pin connected to the MAX8
-     * @param user_SCLpin Hardware I2C SCL pin connected to the MAX8
-     * @param user_RSTPin Output pin connected to NRST
-     * @param i2cAddress I2C address.  The MAX8 defaults to 0x42
-     * @param i2cPortSpeed I2C frequency.
-     */
-    UBloxGPS(PinName user_SDApin, PinName user_SCLpin, PinName user_RSTPin,
-        uint8_t i2cAddress = UBloxGPS_I2C_DEF_ADDRESS, int i2cPortSpeed = 100000);
-
-    /**
      * @brief Construct an SPI UBloxGPS, providing pins and parameters.
      *
      * @note This doesn't actually initialize the chip, you will need to call begin() for that.
@@ -255,16 +241,6 @@ protected:
      */
     bool isNMEASentence = false;
 
-    /*
-     * @brief I2C address of the device if using it in I2C mode.
-     */
-    uint8_t i2cAddress;
-
-    /**
-     * @brief Flag that is initialized to true, if this UBloxGPS is constructed in SPI mode.
-     */
-    const bool isSPI;
-
     int DEBUG(const char* format, ...);
     int DEBUG_TR(const char* format, ...);
 
@@ -337,34 +313,9 @@ private:
     ReadStatus performSPITransaction(uint8_t* packet, uint16_t packetLen);
 
     /**
-     * @brief Perform an I2C Read
-     *
-     * @return ReadStatus::DONE if the read was successful
-     *         ReadStatus::NO_DATA if there was no valid bytes available
-     *         ReadStatus::ERR if an invalid byte or checksum was detected.
-     */
-    ReadStatus readMessageI2C();
-
-    /**
-     * @brief Perform an I2C Write
-     *
-     * @param packet buffer of bytes to send out to the chip
-     * @param packetLen number of bytes in packet.
-     *
-     * @return true if the write was successful, false otherwise.
-     */
-    bool sendMessageI2C(uint8_t* packet, uint16_t packetLen);
-
-    /**
      * @brief Update state variable from information contained in the message in rxBuffer
      */
     void processMessage();
-
-    /**
-     * @brief Returns length of buffer in the GPS module's I2C output buffer.
-     * @returns Length of buffer, or -1 if unsuccessful.
-     */
-    int32_t readLenI2C();
 
     /**
      * @brief Calculate the checksum for the given packet. The packet should include the 
@@ -388,16 +339,6 @@ private:
      * @brief Length of message currently in currMessageLength
      */
     size_t currMessageLength_ = 0;
-
-    /**
-     * @brief I2C port, if in I2C mode. Otherwise, unused.
-     */
-    I2C i2cPort_;
-
-    /**
-     * @brief I2C clock speed
-     */
-    int i2cPortSpeed_;
 
     /**
      * @brief SPI port, if in SPI mode. Otherwise, unused.

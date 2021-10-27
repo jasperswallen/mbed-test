@@ -37,30 +37,16 @@ bool ZEDF9P::configure()
 {
     // switch to UBX mode
     bool ret = true;
-    if (isSPI)
-    {
-        ret &= setValue(CFG_SPIINPROT_NMEA, 0);
-        ret &= setValue(CFG_SPIINPROT_UBX, 1);
 
-        ret &= setValue(CFG_SPIOUTPROT_NMEA, 0);
-        ret &= setValue(CFG_SPIOUTPROT_UBX, 1);
-        ret &= setValue(CFG_MSGOUT_UBX_NAV_PVT + MSGOUT_OFFSET_SPI, 1);
+    ret &= setValue(CFG_SPIINPROT_NMEA, 0);
+    ret &= setValue(CFG_SPIINPROT_UBX, 1);
 
-        // Explicity disable raw gps logging
-        ret &= setValue(CFG_MSGOUT_UBX_RXM_RAWX + MSGOUT_OFFSET_SPI, 0);
-    }
-    else
-    {
-        ret &= setValue(CFG_I2CINPROT_NMEA, 0);
-        ret &= setValue(CFG_I2CINPROT_UBX, 1);
+    ret &= setValue(CFG_SPIOUTPROT_NMEA, 0);
+    ret &= setValue(CFG_SPIOUTPROT_UBX, 1);
+    ret &= setValue(CFG_MSGOUT_UBX_NAV_PVT + MSGOUT_OFFSET_SPI, 1);
 
-        ret &= setValue(CFG_I2COUTPROT_NMEA, 0);
-        ret &= setValue(CFG_I2CINPROT_UBX, 1);
-        ret &= setValue(CFG_MSGOUT_UBX_NAV_PVT + MSGOUT_OFFSET_I2C, 1);
-
-        // Explicity disable raw gps logging
-        ret &= setValue(CFG_MSGOUT_UBX_RXM_RAWX + MSGOUT_OFFSET_I2C, 1);
-    }
+    // Explicity disable raw gps logging
+    ret &= setValue(CFG_MSGOUT_UBX_RXM_RAWX + MSGOUT_OFFSET_SPI, 0);
 
     ret &= setValue(CFG_HW_ANT_CFG_VOLTCTRL, 1);
     return ret;
