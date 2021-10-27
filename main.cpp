@@ -165,6 +165,21 @@ void connect_to_adis()
 
 void connect_to_bno()
 {
+    BNO080I2C bno_i2c(I2C3_SDA, I2C3_SCL, BNO_INT, BNO_RST);
+
+    printf("\r\n\r\nConnecting to BNO over I2C...\r\n");
+
+    ThisThread::sleep_for(1s);
+
+    if (bno_i2c.begin())
+    {
+        printf("Successfully Connected!\r\n");
+    }
+    else
+    {
+        printf("Failed to connect\r\n");
+    }
+
     BNO080SPI bno_spi(BNO_RST, BNO_INT, BNO_WAKE, BNO_MISO, BNO_MOSI, BNO_SCLK, BNO_CS, 2000000);
 
     printf("\r\n\r\nConnecting to BNO over SPI...\r\n");
@@ -178,18 +193,6 @@ void connect_to_bno()
     }
 
     ThisThread::sleep_for(1s);
-
-    BNO080I2C bno_i2c(I2C3_SDA, I2C3_SCL, BNO_INT, BNO_RST);
-
-    printf("\r\n\r\nConnecting to BNO over I2C...\r\n");
-    if (bno_i2c.begin())
-    {
-        printf("Successfully Connected!\r\n");
-    }
-    else
-    {
-        printf("Failed to connect\r\n");
-    }
 }
 
 int main()

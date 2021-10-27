@@ -34,6 +34,8 @@
 
 using namespace std::chrono_literals;
 
+#define BNO_PRINT_ERRORS 1
+
 /**
   Class to drive the BNO080 9-axis IMU.
   

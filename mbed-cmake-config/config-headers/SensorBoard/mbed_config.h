@@ -22,7 +22,7 @@
 #define __MBED_CONFIG_DATA__
 
 // Configuration parameters
-#define CLOCK_SOURCE                                                      USE_PLL_HSI                                             // set by application[SensorBoard]
+#define CLOCK_SOURCE                                                      USE_PLL_HSE_EXTC                                        // set by application[SensorBoard]
 #define LPTICKER_DELAY_TICKS                                              0                                                       // set by target:MCU_STM32H7
 #define MBED_CONF_DRIVERS_OSPI_CSN                                        OSPI_FLASH1_CSN                                         // set by library:drivers
 #define MBED_CONF_DRIVERS_OSPI_DQS                                        OSPI_FLASH1_DQS                                         // set by library:drivers
