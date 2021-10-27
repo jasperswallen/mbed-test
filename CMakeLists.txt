@@ -12,13 +12,14 @@ include(mbed-cmake/mbed-cmake.cmake)
 
 project(MBED-TEST LANGUAGES NONE)
 
+add_subdirectory(ScopeGuard)
 add_subdirectory(drivers)
 
 include_directories(include)
 
 add_mbed_executable(mbed-test main.cpp)
 
-target_link_libraries(mbed-test kx134)
+target_link_libraries(mbed-test kx134 ubloxgps)
 
 # build report
 # -------------------------------------------------------------
