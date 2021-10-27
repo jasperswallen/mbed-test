@@ -19,7 +19,7 @@ include_directories(include)
 
 add_mbed_executable(mbed-test main.cpp)
 
-target_link_libraries(mbed-test kx134 ubloxgps lm75b)
+target_link_libraries(mbed-test kx134 ubloxgps lm75b ms5607)
 
 # build report
 # -------------------------------------------------------------

@@ -2,6 +2,7 @@
 
 #include "KX134SPI.h"
 #include "LM75B.h"
+#include "MS5607SPI.h"
 #include "ZEDFP9.h"
 
 constexpr PinName ACC_MOSI = PF_9;
@@ -18,6 +19,8 @@ constexpr PinName MISC_SCLK = PE_12;
 
 constexpr PinName I2C3_SDA = PC_9;
 constexpr PinName I2C3_SCL = PA_8;
+
+constexpr PinName ALT_CS = PE_7;
 
 void connect_to_accel()
 {
@@ -78,10 +81,49 @@ void connect_to_temp_sensor()
     }
 }
 
+void connect_to_altimeter()
+{
+    MS5607SPI alt(MISC_MOSI, MISC_MISO, MISC_SCLK, ALT_CS);
+
+    printf("\r\n\r\nConnecting to altimeter...\r\n");
+    if (alt.init())
+    {
+        printf("Successfully Connected!\r\n");
+
+        /* Perform a temperature conversion */
+        alt.startTempConversion();
+        while (alt.conversionInProgress())
+        {
+            ThisThread::sleep_for(100ms);
+        }
+        int rawTemp = alt.getConversionResult();
+
+        /* Perform a pressure conversion */
+        alt.startPressureConversion();
+        while (alt.conversionInProgress())
+        {
+            ThisThread::sleep_for(100ms);
+        }
+        int rawPressure = alt.getConversionResult();
+
+        printf(
+            "Read temp = %f, pressure = %f, altitude = %f\r\n",
+            alt.convertToTemp(rawTemp),
+            alt.convertToPressure(rawTemp, rawPressure),
+            alt.convertToAltitude(rawTemp, rawPressure));
+    }
+    else
+    {
+        printf("Failed to connect\r\n");
+    }
+}
+
 int main()
 {
     connect_to_accel();
     connect_to_gps();
+    connect_to_temp_sensor();
+    connect_to_altimeter();
 
     int counter = 0;
 
