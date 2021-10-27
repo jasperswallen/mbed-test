@@ -1,6 +1,7 @@
 #include <mbed.h>
 
 #include "ADIS16467.h"
+#include "BNO080.h"
 #include "KX134SPI.h"
 #include "LM75B.h"
 #include "MS5607SPI.h"
@@ -25,6 +26,14 @@ constexpr PinName ALT_CS = PE_7;
 
 constexpr PinName ADIS_CS  = PE_9;
 constexpr PinName ADIS_RST = PE_8;
+
+constexpr PinName BNO_RST  = PD_9;
+constexpr PinName BNO_INT  = PD_10;
+constexpr PinName BNO_WAKE = PD_11;
+constexpr PinName BNO_MISO = PB_14;
+constexpr PinName BNO_MOSI = PB_15;
+constexpr PinName BNO_SCLK = PB_10;
+constexpr PinName BNO_CS   = PD_8;
 
 void connect_to_accel()
 {
@@ -154,12 +163,43 @@ void connect_to_adis()
     }
 }
 
+void connect_to_bno()
+{
+    BNO080SPI bno_spi(BNO_RST, BNO_INT, BNO_WAKE, BNO_MISO, BNO_MOSI, BNO_SCLK, BNO_CS, 2000000);
+
+    printf("\r\n\r\nConnecting to BNO over SPI...\r\n");
+    if (bno_spi.begin())
+    {
+        printf("Successfully Connected!\r\n");
+    }
+    else
+    {
+        printf("Failed to connect\r\n");
+    }
+
+    ThisThread::sleep_for(1s);
+
+    BNO080I2C bno_i2c(I2C3_SDA, I2C3_SCL, BNO_INT, BNO_RST);
+
+    printf("\r\n\r\nConnecting to BNO over I2C...\r\n");
+    if (bno_i2c.begin())
+    {
+        printf("Successfully Connected!\r\n");
+    }
+    else
+    {
+        printf("Failed to connect\r\n");
+    }
+}
+
 int main()
 {
     connect_to_accel();
     connect_to_gps();
     connect_to_temp_sensor();
     connect_to_altimeter();
+    connect_to_adis();
+    connect_to_bno();
 
     int counter = 0;
 

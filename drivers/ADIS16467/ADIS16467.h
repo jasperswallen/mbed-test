@@ -61,7 +61,6 @@ public:
      *
      * Sets all error flag variables to false
      *
-     * @param[in] debug The debug port to output debug messages to
      * @param[in] DIN SPI data input (MOSI)
      * @param[in] DOUT SPI data output (MISO)
      * @param[in] SCLK Clock pin
