@@ -17,9 +17,12 @@ add_subdirectory(drivers)
 
 include_directories(include)
 
+add_library(libmbed-test INTERFACE)
+target_link_libraries(libmbed-test INTERFACE kx134 ubloxgps lm75b ms5607 adis16467 bno080)
+
 add_mbed_executable(mbed-test main.cpp)
 
-target_link_libraries(mbed-test kx134 ubloxgps lm75b ms5607 adis16467 bno080)
+target_link_libraries(mbed-test libmbed-test)
 
 # build report
 # -------------------------------------------------------------

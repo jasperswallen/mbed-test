@@ -810,6 +810,9 @@ bool BNO080Base::waitForPacket(int channel, uint8_t reportID, std::chrono::milli
 		{
 			if(!receivePacket(timeout))
 			{
+#if BNO_PRINT_ERRORS
+                printf("Failed to receive packet\r\n");
+#endif
 				return false;
 			}
 
@@ -1629,6 +1632,9 @@ bool BNO080SPI::receiveCompletePacket(size_t bytesRead, std::chrono::millisecond
 	if (totalLength == 0)
 	{
 		// Packet is empty
+#if BNO_PRINT_ERRORS
+        printf("Empty packet\r\n");
+#endif
 		return (false); //All done
 	}
 
