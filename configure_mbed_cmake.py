@@ -3,4 +3,4 @@
 import subprocess
 import sys
 
-print(subprocess.check_output([sys.executable, "mbed-cmake/configure_for_target.py", "-a", "mbed_app.json", "-x", ".", "-i", ".mbedignore", "MicroDAQHub", "SensorBoard"]))
+print(subprocess.check_output([sys.executable, "mbed-cmake/configure_for_target.py", "-a", "mbed_app.json", "-x", ".", "-i", ".mbedignore", "MicroDAQHub", "SensorBoard", "NUCLEO_H743ZI2"]))
