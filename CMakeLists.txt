@@ -14,7 +14,11 @@ project(MBED-TEST LANGUAGES NONE)
 
 include_directories(include)
 
+add_subdirectory(drivers)
+
 add_mbed_executable(mbed-test main.cpp)
+
+target_link_libraries(mbed-test ADS124S0x)
 
 # build report
 # -------------------------------------------------------------
