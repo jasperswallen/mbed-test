@@ -118,6 +118,15 @@ void connect_to_altimeter()
 {
     MS5607SPI alt(MISC_MOSI, MISC_MISO, MISC_SCLK, ALT_CS);
 
+    if(alt.init())
+    {
+        printf("MS5607 detected!\r\n");
+    }
+    else
+    {
+        printf("MS5607 not detected!\r\n");
+    }
+
     /* Perform a temperature conversion */
     alt.startTempConversion();
     while (alt.conversionInProgress())

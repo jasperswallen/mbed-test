@@ -64,9 +64,12 @@ private:
 #else
 public:
     MS5607SPI(PinName _mosi, PinName _miso, PinName _sclk, PinName _csb)
-    : miso(_mosi), spi(_mosi, _miso, _sclk, _csb, use_gpio_ssel_t())
+    : spi(new SPI(_mosi, _miso, _sclk, _csb, use_gpio_ssel_t()))
+    , mosi(_mosi)
+    , miso(_miso)
+    , sclk(_sclk)
+    , csb(_csb)
     {
-        init();
     }
     
     virtual bool conversionInProgress(){
@@ -84,62 +87,83 @@ public:
     }
 
     virtual int getConversionResult(){
-        spi.select();
-        spi.write(ADC_READ);
-        int hi = spi.write(0);
-        int mid = spi.write(0);
-        int low = spi.write(0);
+        spi->select();
+        spi->write(ADC_READ);
+        int hi = spi->write(0);
+        int mid = spi->write(0);
+        int low = spi->write(0);
 
-        spi.deselect();
+        spi->deselect();
         curConversion = NONE;
         return hi << 16 | mid << 8 | low;
     }
 
 private:
-    SPI spi;
+    SPI* spi;
+    PinName mosi;
     PinName miso;
+    PinName sclk;
+    PinName csb;
 
     virtual void writeCommand(int command, int ms = 0) {
-        spi.select();
-        spi.write(command);
+        spi->select();
+        spi->write(command);
         if (ms) ThisThread::sleep_for(std::chrono::milliseconds(ms));
-        spi.deselect();
+        spi->deselect();
     }
 
   
     virtual bool sendReset()
     {
-        bool success = false;
-        spi.select();
-        spi.write(RESET);
+        spi->select();
+        spi->write(RESET);
+
+        delete spi;
 
         // per the datasheet, sending a reset takes exactly 2.8 ms
-        ThisThread::sleep_for(4ms);
+        // Empirically, it only takes 2.012 ms
+        // Set the timeout to 3.5ms, just in case
 
-        spi.deselect();
+        ThisThread::sleep_for(4ms);
+        
+        DigitalIn* misoReader = new DigitalIn(miso);
+
+        bool success;
+        // Return true if MISO goes high after 4ms (MISO is low by default)
+        if(misoReader->read() == 0)
+        {
+            success = false;
+        }
+        else
+        {
+            success = true;
+        }
+
+        delete misoReader;
+        spi = new SPI(mosi, miso, sclk, csb, use_gpio_ssel_t());
         return success;
     }
 
 
     virtual int readPROM(int address) {
-        spi.select();
-        spi.write(PROM_READ | address << 1);
-        int hi = spi.write(0);
-        int low = spi.write(0);
-        spi.deselect();
+        spi->select();
+        spi->write(PROM_READ | address << 1);
+        int hi = spi->write(0);
+        int low = spi->write(0);
+        spi->deselect();
         return hi << 8 | low;
     }
 
     virtual void startConversion(int command){
         static int duration[] = {500, 1100, 2100, 4100, 8220};
-        spi.select();
-        spi.write(ADC_CONV | command);
+        spi->select();
+        spi->write(ADC_CONV | command);
         
         waitTime = duration[(command & 0x0F) >> 1];
         timer.stop();
         timer.reset();
         timer.start();
-        spi.deselect();
+        spi->deselect();
     }
 #endif
 };
