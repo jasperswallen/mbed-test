@@ -172,10 +172,8 @@ public:
      */
     bool init()
     {
-        if(!sendReset())
-        {
-            return false;
-        }
+        bool success = false;
+        success = sendReset();
 
         c1 = readPROM(1);
         c2 = readPROM(2);
@@ -184,7 +182,7 @@ public:
         c5 = readPROM(5);
         c6 = readPROM(6);
 
-        return true;
+        return success;
     }
 
     virtual bool conversionInProgress() = 0;

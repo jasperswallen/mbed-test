@@ -64,7 +64,7 @@ private:
 #else
 public:
     MS5607SPI(PinName _mosi, PinName _miso, PinName _sclk, PinName _csb)
-    : miso(_miso), spi(_mosi, _miso, _sclk, _csb, use_gpio_ssel_t())
+    : miso(_mosi), spi(_mosi, _miso, _sclk, _csb, use_gpio_ssel_t())
     {
         init();
     }
@@ -89,14 +89,15 @@ public:
         int hi = spi.write(0);
         int mid = spi.write(0);
         int low = spi.write(0);
+
         spi.deselect();
         curConversion = NONE;
         return hi << 16 | mid << 8 | low;
     }
 
 private:
-    PinName miso;
     SPI spi;
+    PinName miso;
 
     virtual void writeCommand(int command, int ms = 0) {
         spi.select();
@@ -113,26 +114,9 @@ private:
         spi.write(RESET);
 
         // per the datasheet, sending a reset takes exactly 2.8 ms
-        ThisThread::sleep_for(1ms);
-
-        // in the middle of the reset period, MISO should be pulled low
-        // the only way to check this is to delete the SPI object
-        //! delete spi;
-
-        {
-            DigitalIn misoReader(miso);
-
-            success = misoReader.read() == 0;
-
-            ThisThread::sleep_for(3ms);
-
-            // by now, the chip should have set MISO high to indicate that the reset was successful
-            success = success && (misoReader.read() != 0);
-
-        }
+        ThisThread::sleep_for(4ms);
 
         spi.deselect();
-
         return success;
     }
 

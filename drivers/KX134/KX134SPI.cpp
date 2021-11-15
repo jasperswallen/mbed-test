@@ -17,7 +17,7 @@ bool KX134SPI::init()
     deselect();
 
     _spi.frequency(SPI_FREQ);
-    _spi.format(8, 1);
+    _spi.format(8, 3);
 
     return reset();
 }

@@ -58,6 +58,26 @@ void connect_to_accel()
     {
         printf("No existence\r\n");
     }
+
+    accel.setOutputDataRateHz(10);
+    for (int i = 0; i < 10; i++)
+    {
+       while (!accel.dataReady()){};
+
+       int16_t output[3];
+       accel.getAccelerations(output);
+       float ax = accel.convertRawToGravs(output[0]);
+       float ay = accel.convertRawToGravs(output[1]);
+       float az = accel.convertRawToGravs(output[2]);
+
+       printf("KX134 Accel: X: %" PRIi16 " LSB, Y: %" PRIi16 " LSB, Z: %" PRIi16 " LSB \r\n",
+           output[0],
+           output[1],
+           output[2]);
+       printf("KX134 Accel in Gravs: X: %f g, Y: %f g, Z: %f g \r\n", ax, ay, az);
+    }
+
+
 }
 
 void connect_to_gps()
@@ -98,37 +118,27 @@ void connect_to_altimeter()
 {
     MS5607SPI alt(MISC_MOSI, MISC_MISO, MISC_SCLK, ALT_CS);
 
-    printf("\r\n\r\nConnecting to altimeter...\r\n");
-    if (alt.init())
+    /* Perform a temperature conversion */
+    alt.startTempConversion();
+    while (alt.conversionInProgress())
     {
-        printf("Successfully Connected!\r\n");
-
-        /* Perform a temperature conversion */
-        alt.startTempConversion();
-        while (alt.conversionInProgress())
-        {
-            ThisThread::sleep_for(100ms);
-        }
-        int rawTemp = alt.getConversionResult();
-
-        /* Perform a pressure conversion */
-        alt.startPressureConversion();
-        while (alt.conversionInProgress())
-        {
-            ThisThread::sleep_for(100ms);
-        }
-        int rawPressure = alt.getConversionResult();
-
-        printf(
-            "Read temp = %f, pressure = %f, altitude = %f\r\n",
-            alt.convertToTemp(rawTemp),
-            alt.convertToPressure(rawTemp, rawPressure),
-            alt.convertToAltitude(rawTemp, rawPressure));
+        ThisThread::sleep_for(100ms);
     }
-    else
+    int rawTemp = alt.getConversionResult();
+
+    /* Perform a pressure conversion */
+    alt.startPressureConversion();
+    while (alt.conversionInProgress())
     {
-        printf("Failed to connect\r\n");
+        ThisThread::sleep_for(100ms);
     }
+    int rawPressure = alt.getConversionResult();
+
+    printf(
+        "Read temp = %f, pressure = %f, altitude = %f\r\n",
+        alt.convertToTemp(rawTemp),
+        alt.convertToPressure(rawTemp, rawPressure),
+        alt.convertToAltitude(rawTemp, rawPressure));
 }
 
 void connect_to_adis()
@@ -165,21 +175,6 @@ void connect_to_adis()
 
 void connect_to_bno()
 {
-    // BNO080I2C bno_i2c(I2C3_SDA, I2C3_SCL, BNO_INT, BNO_RST);
-
-    // printf("\r\n\r\nConnecting to BNO over I2C...\r\n");
-
-    // ThisThread::sleep_for(1s);
-
-    // if (bno_i2c.begin())
-    // {
-    //     printf("Successfully Connected!\r\n");
-    // }
-    // else
-    // {
-    //     printf("Failed to connect\r\n");
-    // }
-
     BNO080SPI bno_spi(BNO_RST, BNO_INT, BNO_WAKE, BNO_MISO, BNO_MOSI, BNO_SCLK, BNO_CS, 1000000);
 
     printf("\r\n\r\nConnecting to BNO over SPI...\r\n");
@@ -200,19 +195,16 @@ int main()
     printf("Starting CPU...\r\n");
     ThisThread::sleep_for(1s);
 
-    // connect_to_accel();
-    // connect_to_gps();
-    // connect_to_temp_sensor();
-    // connect_to_altimeter();
-    // connect_to_adis();
-    connect_to_bno();
-
-    int counter = 0;
-
     while (true)
     {
-        counter++;
-        printf("Hello, world! %d\r\n", counter);
+        char c;
+        printf("Press any char to connect\r\n");
+        scanf("%c", &c);
+        // connect_to_bno();
+        // connect_to_accel();
+        // connect_to_gps();
+        // connect_to_adis();
+        connect_to_altimeter();
         ThisThread::sleep_for(1000ms);
     }
 }
