@@ -3,7 +3,9 @@
         "*": {
             "platform.stdio-baud-rate": 115200,
             "platform.stdio-buffered-serial": 1,
-            "target.printf_lib": "std"
+            "target.printf_lib": "std",
+            "platform.all-stats-enabled": true,
+            "platform.memory-tracing-enabled": true
         },
         "SensorBoard": {
             "target.clock_source": "USE_PLL_HSE_EXTC",

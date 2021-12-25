@@ -1,4 +1,3 @@
 build/
 .vscode/
-mbed-cmake-config/**
 .DS_Store

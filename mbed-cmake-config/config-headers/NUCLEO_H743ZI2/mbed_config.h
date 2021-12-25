@@ -22,7 +22,8 @@
 #define __MBED_CONFIG_DATA__
 
 // Configuration parameters
-#define CLOCK_SOURCE                                                      USE_PLL_HSE_EXTC                                        // set by application[SensorBoard]
+#define CLOCK_SOURCE                                                      USE_PLL_HSE_EXTC|USE_PLL_HSI                            // set by target:MCU_STM32H7
+#define HSE_VALUE                                                         8000000                                                 // set by target:NUCLEO_H743ZI2
 #define LPTICKER_DELAY_TICKS                                              0                                                       // set by target:MCU_STM32H7
 #define MBED_ALL_STATS_ENABLED                                            1                                                       // set by application[*]
 #define MBED_CONF_DRIVERS_OSPI_CSN                                        OSPI_FLASH1_CSN                                         // set by library:drivers
@@ -183,8 +184,7 @@
 #define MBED_CONF_TARGET_LSE_AVAILABLE                                    1                                                       // set by target:MCU_STM32
 #define MBED_CONF_TARGET_LSE_DRIVE_LOAD_LEVEL                             RCC_LSEDRIVE_LOW                                        // set by target:MCU_STM32H7
 #define MBED_CONF_TARGET_MPU_ROM_END                                      0x0fffffff                                              // set by target:Target
-#define MBED_CONF_TARGET_STDIO_UART_RX                                    PB_7                                                    // set by application[SensorBoard]
-#define MBED_CONF_TARGET_STDIO_UART_TX                                    PB_6                                                    // set by application[SensorBoard]
+#define MBED_CONF_TARGET_NETWORK_DEFAULT_INTERFACE_TYPE                   ETHERNET                                                // set by target:NUCLEO_H743ZI2
 #define MBED_CONF_TARGET_SYSTEM_POWER_SUPPLY                              PWR_LDO_SUPPLY                                          // set by target:MCU_STM32H743xI
 #define MBED_CONF_TARGET_TICKLESS_FROM_US_TICKER                          0                                                       // set by target:Target
 #define MBED_CONF_TARGET_XIP_ENABLE                                       0                                                       // set by target:Target
@@ -194,6 +194,7 @@
 #define MEM_ALLOC                                                         malloc                                                  // set by library:mbed-trace
 #define MEM_FREE                                                          free                                                    // set by library:mbed-trace
 #define PPP_DEBUG                                                         0                                                       // set by library:ppp
+#define STM32_D11_SPI_ETHERNET_PIN                                        PB_5                                                    // set by target:NUCLEO_H743ZI2
 // Macros
 #define NSAPI_PPP_AVAILABLE                                               (MBED_CONF_PPP_ENABLED || MBED_CONF_LWIP_PPP_ENABLED)   // defined by library:ppp
 #define NSDYNMEM_TRACKER_ENABLED                                          MBED_CONF_NANOSTACK_LIBSERVICE_NSDYNMEM_TRACKER_ENABLED // defined by library:nanostack-libservice
