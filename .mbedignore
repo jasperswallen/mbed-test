@@ -1,0 +1,6 @@
+connectivity/*
+storage/*
+!storage/blockdevice/*
+features/*
+drivers/device_key/*
+drivers/usb/*
