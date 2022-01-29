@@ -416,7 +416,7 @@ UBloxGPS::ReadStatus UBloxGPS::performSPITransaction(uint8_t* packet, uint16_t p
         spiCS_ = 0;
     };
 
-    auto cleanup_spi = [this]() { spiCS_ = 1; };
+    auto cleanup_spi = [this]() { spiCS_ = 1; spiPort_.deselect(); };
 
     ScopeGuard<decltype(init_spi), decltype(cleanup_spi)> spiManager(init_spi, cleanup_spi);
 

@@ -22,7 +22,7 @@ bool ZEDF9P::setValue(uint32_t key, uint64_t value, uint8_t layers)
     data[1] = layers;
 
     memcpy(data + 4, &key, sizeof(key));
-    memcpy(data + 4 + sizeof(key), &value, totalLen); // Assuming little endinaness
+    memcpy(data + 4 + sizeof(key), &value, valueLen); // Assuming little endinaness
 
     if (!sendCommand(UBX_CLASS_CFG, UBX_CFG_VALSET, data, totalLen, true, false, 1))
     {

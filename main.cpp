@@ -7,6 +7,7 @@
 #include "MS5607SPI.h"
 #include "ZEDFP9.h"
 
+#if 0
 constexpr PinName ACC_MOSI = PF_9;
 constexpr PinName ACC_MISO = PF_8;
 constexpr PinName ACC_SCLK = PF_7;
@@ -79,10 +80,11 @@ void connect_to_accel()
 
 
 }
+#endif
 
 void connect_to_gps()
 {
-    UBlox::ZEDF9P gps(MISC_MOSI, MISC_MISO, GPS_RST, MISC_SCLK, GPS_CS);
+    UBlox::ZEDF9P gps(p5, p6, p9, p7, p8);
 
     printf("\r\n\r\nConnecting to GPS...\r\n");
     if (gps.begin(true))
@@ -95,6 +97,7 @@ void connect_to_gps()
     }
 }
 
+#if 0
 void connect_to_temp_sensor()
 {
     LM75B temp(I2C3_SDA, I2C3_SCL);
@@ -198,6 +201,7 @@ void connect_to_bno()
 
     ThisThread::sleep_for(1s);
 }
+#endif
 
 int main()
 {
@@ -211,9 +215,9 @@ int main()
         scanf("%c", &c);
         // connect_to_bno();
         // connect_to_accel();
-        // connect_to_gps();
+        connect_to_gps();
         // connect_to_adis();
-        connect_to_altimeter();
+        // connect_to_altimeter();
         ThisThread::sleep_for(1000ms);
     }
 }
